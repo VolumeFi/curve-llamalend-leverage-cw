@@ -231,7 +231,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "curve-leverage-lending-bot-cw"
+name = "curve-llammalend-leverage-bot-cw"
 version = "0.1.0"
 dependencies = [
  "cosmwasm-schema",
@@ -241,6 +241,7 @@ dependencies = [
  "cw2",
  "ethabi",
  "getrandom",
+ "hex",
  "schemars",
  "serde",
  "thiserror",

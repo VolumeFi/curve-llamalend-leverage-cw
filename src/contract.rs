@@ -52,6 +52,7 @@ pub fn execute(
             bot_id,
             callbacker,
             callback_args,
+            callback_bytes,
             remaining_count,
         } => execute::create_next_bot(
             deps,
@@ -60,6 +61,7 @@ pub fn execute(
             bot_id,
             callbacker,
             callback_args,
+            callback_bytes,
             remaining_count,
         ),
         ExecuteMsg::SetPaloma {} => execute::set_paloma(deps, info),
@@ -99,6 +101,7 @@ pub mod execute {
         bot_id: Uint256,
         callbacker: String,
         callback_args: Vec<Uint256>,
+        callback_bytes: String,
         remaining_count: Uint256,
     ) -> Result<Response<PalomaMsg>, ContractError> {
         let state = STATE.load(deps.storage)?;
@@ -126,6 +129,11 @@ pub mod execute {
                         Param {
                             name: "callback_args".to_string(),
                             kind: ParamType::Array(Box::new(ParamType::Uint(256))),
+                            internal_type: None,
+                        },
+                        Param {
+                            name: "callback_bytes".to_string(),
+                            kind: ParamType::Bytes,
                             internal_type: None,
                         },
                         Param {
@@ -162,6 +170,7 @@ pub mod execute {
                     )))
                 }
                 tokens.push(Token::Array(tokens_callback_args));
+                tokens.push(Token::Bytes(hex::decode(callback_bytes).unwrap()));
                 tokens.push(Token::Uint(Uint::from_big_endian(
                     &remaining_count.to_be_bytes(),
                 )));
@@ -183,6 +192,7 @@ pub mod execute {
                 )))
             }
             tokens.push(Token::Array(tokens_callback_args));
+            tokens.push(Token::Bytes(hex::decode(callback_bytes).unwrap()));
             tokens.push(Token::Uint(Uint::from_big_endian(
                 &remaining_count.to_be_bytes(),
             )));
@@ -247,6 +257,11 @@ pub mod execute {
                             )))),
                             internal_type: None,
                         },
+                        Param {
+                            name: "callback_bytes".to_string(),
+                            kind: ParamType::Bytes,
+                            internal_type: None,
+                        },
                     ],
                     outputs: Vec::new(),
                     constant: None,
@@ -261,6 +276,7 @@ pub mod execute {
         let mut token_bots: Vec<Token> = vec![];
         let mut token_callbackers: Vec<Token> = vec![];
         let mut token_callback_args: Vec<Token> = vec![];
+        let mut token_callback_bytes: Vec<Token> = vec![];
         let retry_delay: u64 = state.retry_delay;
         for bot in bot_info {
             if let Some(timestamp) = WITHDRAW_TIMESTAMP
@@ -278,6 +294,8 @@ pub mod execute {
                         )))
                     }
                     token_callback_args.push(Token::Array(callback_args));
+                    token_callback_bytes
+                        .push(Token::Bytes(hex::decode(bot.callback_bytes).unwrap()));
                     WITHDRAW_TIMESTAMP.save(
                         deps.storage,
                         (bot.bot.to_owned(), "repay".to_string()),
@@ -296,6 +314,7 @@ pub mod execute {
                     )))
                 }
                 token_callback_args.push(Token::Array(callback_args));
+                token_callback_bytes.push(Token::Bytes(hex::decode(bot.callback_bytes).unwrap()));
                 WITHDRAW_TIMESTAMP.save(
                     deps.storage,
                     (bot.bot.to_owned(), "repay".to_string()),
@@ -310,6 +329,7 @@ pub mod execute {
                 Token::Array(token_bots),
                 Token::Array(token_callbackers),
                 Token::Array(token_callback_args),
+                Token::Array(token_callback_bytes),
             ];
             Ok(Response::new()
                 .add_message(CosmosMsg::Custom(PalomaMsg {

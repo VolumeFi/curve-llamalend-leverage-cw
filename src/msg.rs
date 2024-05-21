@@ -14,6 +14,7 @@ pub struct BotInfo {
     pub bot: String,
     pub callbacker: String,
     pub callback_args: Vec<Uint256>,
+    pub callback_bytes: String,
 }
 
 #[cw_serde]
@@ -22,6 +23,7 @@ pub enum ExecuteMsg {
         bot_id: Uint256,
         callbacker: String,
         callback_args: Vec<Uint256>,
+        callback_bytes: String,
         remaining_count: Uint256,
     },
     RepayBot {

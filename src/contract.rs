@@ -94,6 +94,7 @@ pub mod execute {
     use cosmwasm_std::Uint256;
     use ethabi::Address;
 
+    #[allow(clippy::too_many_arguments)]
     pub fn create_next_bot(
         deps: DepsMut,
         env: Env,

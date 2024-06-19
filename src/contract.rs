@@ -260,7 +260,7 @@ pub mod execute {
                         },
                         Param {
                             name: "callback_bytes".to_string(),
-                            kind: ParamType::Bytes,
+                            kind: ParamType::Array(Box::new(ParamType::Bytes)),
                             internal_type: None,
                         },
                     ],
